@@ -1,154 +1,158 @@
-var Twit = require('./keys.js');
+var keys = require("./keys.js");
 
-process.argv.forEach(function (val, index, array) {
-  console.log(index + ': ' + val);
-});
+var request = require("request");
 
+var spotify = require("spotify")
 
-var T = new Twit({
-  consumer_key:         '...',
-  consumer_secret:      '...',
-  access_token:         '...',
-  access_token_secret:  '...',
-  timeout_ms:           60*1000,  // optional HTTP request timeout to apply to all requests.
-})
+var Twitter = require('twitter');
 
-//
-//  tweet 'hello world!'
-//
-T.post('statuses/update', { status: 'hello world!' }, function(err, data, response) {
-  console.log(data)
-})
+var fs = require("fs");
 
-//
-//  search twitter for all tweets containing the word 'banana' since July 11, 2011
-//
-T.get('search/tweets', { q: 'banana since:2011-07-11', count: 100 }, function(err, data, response) {
-  console.log(data)
-})
+  command = process.argv;
 
-//
-//  get the list of user id's that follow @tolga_tezel
-//
-T.get('followers/ids', { screen_name: 'tolga_tezel' },  function (err, data, response) {
-  console.log(data)
-})
+  task = command[2];
 
-//
-// Twit has promise support; you can use the callback API,
-// promise API, or both at the same time.
-//
-T.get('account/verify_credentials', { skip_status: true })
-  .catch(function (err) {
-    console.log('caught error', err.stack)
-  })
-  .then(function (result) {
-    // `result` is an Object with keys "data" and "resp".
-    // `data` and `resp` are the same objects as the ones passed
-    // to the callback.
-    // See https://github.com/ttezel/twit#tgetpath-params-callback
-    // for details.
+  taskTarget = command[3];
+  append(task+taskTarget);
 
-    console.log('data', result.data);
-  })
+function append(data) {
+  fs.appendFile("log.txt"," "+data+" ",function (error) {
 
-//
-//  retweet a tweet with id '343360866131001345'
-//
-T.post('statuses/retweet/:id', { id: '343360866131001345' }, function (err, data, response) {
-  console.log(data)
-})
-
-//
-//  destroy a tweet with id '343360866131001345'
-//
-T.post('statuses/destroy/:id', { id: '343360866131001345' }, function (err, data, response) {
-  console.log(data)
-})
-
-//
-// get `funny` twitter users
-//
-T.get('users/suggestions/:slug', { slug: 'funny' }, function (err, data, response) {
-  console.log(data)
-})
-
-//
-// post a tweet with media
-//
-var b64content = fs.readFileSync('/path/to/img', { encoding: 'base64' })
-
-// first we must post the media to Twitter
-T.post('media/upload', { media_data: b64content }, function (err, data, response) {
-  // now we can assign alt text to the media, for use by screen readers and
-  // other text-based presentations and interpreters
-  var mediaIdStr = data.media_id_string
-  var altText = "Small flowers in a planter on a sunny balcony, blossoming."
-  var meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
-
-  T.post('media/metadata/create', meta_params, function (err, data, response) {
-    if (!err) {
-      // now we can reference the media and post a tweet (media will attach to the tweet)
-      var params = { status: 'loving life #nofilter', media_ids: [mediaIdStr] }
-
-      T.post('statuses/update', params, function (err, data, response) {
-        console.log(data)
-      })
+    if(error) {
+      console.log(error);
     }
-  })
-})
+  });
+}
 
-//
-// post media via the chunked media upload API.
-// You can then use POST statuses/update to post a tweet with the media attached as in the example above using `media_id_string`.
-// Note: You can also do this yourself manually using T.post() calls if you want more fine-grained
-// control over the streaming. Example: https://github.com/ttezel/twit/blob/master/tests/rest_chunked_upload.js#L20
-//
-var filePath = '/absolute/path/to/file.mp4'
-T.postMediaChunked({ file_path: filePath }, function (err, data, response) {
-  console.log(data)
-})
+  
 
-//
-//  stream a sample of public statuses
-//
-var stream = T.stream('statuses/sample')
+function runTwitter () {
 
-stream.on('tweet', function (tweet) {
-  console.log(tweet)
-})
+  var myTweets = new Twitter ({
 
-//
-//  filter the twitter public stream by the word 'mango'.
-//
-var stream = T.stream('statuses/filter', { track: 'mango' })
-
-stream.on('tweet', function (tweet) {
-  console.log(tweet)
-})
-
-//
-// filter the public stream by the latitude/longitude bounded box of San Francisco
-//
-var sanFrancisco = [ '-122.75', '36.8', '-121.75', '37.8' ]
-
-var stream = T.stream('statuses/filter', { locations: sanFrancisco })
-
-stream.on('tweet', function (tweet) {
-  console.log(tweet)
-})
-
-//
-// filter the public stream by english tweets containing `#apple`
-//
-var stream = T.stream('statuses/filter', { track: '#apple', language: 'en' })
-
-stream.on('tweet', function (tweet) {
-  console.log(tweet)
-})
+    consumer_key: keys.twitterKeys.consumer_key,
+    consumer_secret: keys.twitterKeys.consumer_secret,
+    access_token_key: keys.twitterKeys.access_token_key,
+    access_token_secret: keys.twitterKeys.access_token_secret
+  });
 
 
+  var params = {screen_name: 'DaskalDM'};
+  myTweets.get('statuses/user_timeline', params, function(error, tweets, response){
+    if (!error) {
+      numTweets = tweets.length;
+      if (numTweets > 20) {
+        numTweets = 20;
+      }
+      
+       for(i = 0; i < numTweets; i++) {
+        
+        console.log("Tweet created on: "+tweets[i].created_at);
+        console.log(tweets[i].text);
+       }
+   }
+
+  });
+
+ }
+
+
+ 
+function spotifyThis(songName) {
+  if (!songName) {
+    songName = "what's my age again";
+  }
+
+  spotify.search({ type: 'track', query: songName }, function(err, data) {
+    if ( err ) {
+        console.log('Error occurred: ' + err);
+        return;
+    }
+
+    songArtist = data.tracks.items[0].artists[0].name;
+    songLink = data.tracks.items[0].album.external_urls.spotify;
+    album = data.tracks.items[0].album.name;
+
+    console.log(songArtist);
+    console.log(songName);
+    console.log(songLink);
+    console.log(album);
+     
+  });
+
+ }
+
+function movieTHis (moviename) {
+
+  if (!moviename) {
+    moviename = "Mr. Nobody";
+  }
+
+  request("http://www.omdbapi.com/?t="+moviename+"&y=&plot=short&r=json", function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    jsonBody = JSON.parse(body);
+    console.log(jsonBody.Title);
+    console.log(jsonBody.Year);
+    console.log(jsonBody.imdbRating);
+    console.log(jsonBody.Country);
+    console.log(jsonBody.Language);
+    console.log(jsonBody.Actors);
+    console.log(jsonBody.Plot);
+      }
+      });
+
+    }
+
+  function doRandom() { 
+  fs.readFile("random.txt","utf8", function(err,data) {
+
+    if (err) {
+      console.log(err);
+    }
+
+    var randomCommand = (data.split(","));
+
+    task = randomCommand[0];
+
+    taskTarget = randomCommand[1];
+
+    console.log(task);
+    console.log(taskTarget);
+
+    chooseTask();
+    
+    });
+   }
+
+    if (task == "do-what-it-says") {
+
+      doRandom();
+    }
+
+     else {
+
+      chooseTask();
+     }
 
 
 
-//need help
+   function chooseTask () {
+
+    if (task == "spotify-this-song") {
+
+      spotifyThis(taskTarget);
+    }
+
+    else if (task == "my-tweets") {
+
+      runTwitter();
+    }
+
+    else if (task == "movie-this") {
+
+      movieTHis(taskTarget);
+    }
+  }
+
+
+// still need help understanding... 
