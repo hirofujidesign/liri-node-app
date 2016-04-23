@@ -8,12 +8,12 @@ var Twitter = require('twitter');
 
 var fs = require("fs");
 
-  command = process.argv;
+command = process.argv;
 
-  task = command[2];
+task = command[2];
 
-  taskTarget = command[3];
-  append(task+taskTarget);
+taskTarget = command[3];
+append(task+taskTarget);
 
 function append(data) {
   fs.appendFile("log.txt"," "+data+" ",function (error) {
@@ -24,7 +24,7 @@ function append(data) {
   });
 }
 
-  
+
 
 function runTwitter () {
 
@@ -37,7 +37,7 @@ function runTwitter () {
   });
 
 
-  var params = {screen_name: 'DaskalDM'};
+  var params = {screen_name: 'hirofuji'};
   myTweets.get('statuses/user_timeline', params, function(error, tweets, response){
     if (!error) {
       numTweets = tweets.length;
@@ -45,19 +45,19 @@ function runTwitter () {
         numTweets = 20;
       }
       
-       for(i = 0; i < numTweets; i++) {
-        
+      for(i = 0; i < numTweets; i++) {
+
         console.log("Tweet created on: "+tweets[i].created_at);
         console.log(tweets[i].text);
-       }
-   }
+      }
+    }
 
   });
 
- }
+}
 
 
- 
+
 function spotifyThis(songName) {
   if (!songName) {
     songName = "what's my age again";
@@ -65,8 +65,8 @@ function spotifyThis(songName) {
 
   spotify.search({ type: 'track', query: songName }, function(err, data) {
     if ( err ) {
-        console.log('Error occurred: ' + err);
-        return;
+      console.log('Error occurred: ' + err);
+      return;
     }
 
     songArtist = data.tracks.items[0].artists[0].name;
@@ -77,10 +77,10 @@ function spotifyThis(songName) {
     console.log(songName);
     console.log(songLink);
     console.log(album);
-     
+
   });
 
- }
+}
 
 function movieTHis (moviename) {
 
@@ -89,21 +89,21 @@ function movieTHis (moviename) {
   }
 
   request("http://www.omdbapi.com/?t="+moviename+"&y=&plot=short&r=json", function (error, response, body) {
-  if (!error && response.statusCode == 200) {
-    jsonBody = JSON.parse(body);
-    console.log(jsonBody.Title);
-    console.log(jsonBody.Year);
-    console.log(jsonBody.imdbRating);
-    console.log(jsonBody.Country);
-    console.log(jsonBody.Language);
-    console.log(jsonBody.Actors);
-    console.log(jsonBody.Plot);
-      }
-      });
-
+    if (!error && response.statusCode == 200) {
+      jsonBody = JSON.parse(body);
+      console.log(jsonBody.Title);
+      console.log(jsonBody.Year);
+      console.log(jsonBody.imdbRating);
+      console.log(jsonBody.Country);
+      console.log(jsonBody.Language);
+      console.log(jsonBody.Actors);
+      console.log(jsonBody.Plot);
     }
+  });
 
-  function doRandom() { 
+}
+
+function doRandom() { 
   fs.readFile("random.txt","utf8", function(err,data) {
 
     if (err) {
@@ -121,38 +121,38 @@ function movieTHis (moviename) {
 
     chooseTask();
     
-    });
-   }
+  });
+}
 
-    if (task == "do-what-it-says") {
+if (task == "do-what-it-says") {
 
-      doRandom();
-    }
+  doRandom();
+}
 
-     else {
+else {
 
-      chooseTask();
-     }
+  chooseTask();
+}
 
 
 
-   function chooseTask () {
+function chooseTask () {
 
-    if (task == "spotify-this-song") {
+  if (task == "spotify-this-song") {
 
-      spotifyThis(taskTarget);
-    }
-
-    else if (task == "my-tweets") {
-
-      runTwitter();
-    }
-
-    else if (task == "movie-this") {
-
-      movieTHis(taskTarget);
-    }
+    spotifyThis(taskTarget);
   }
+
+  else if (task == "my-tweets") {
+
+    runTwitter();
+  }
+
+  else if (task == "movie-this") {
+
+    movieTHis(taskTarget);
+  }
+}
 
 
 // still need help understanding... 
